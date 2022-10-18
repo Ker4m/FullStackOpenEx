@@ -1,13 +1,14 @@
 const Footer = ({ parts }) => {
-  let sum = 0;
-  parts.forEach(part => sum += part.exercises )
+  const total = parts.map(part=>part.exercises).reduce((s, p) => {
+    return s + p
+  });
     return (
       <b>
         total of
-        {' ' +sum+' '}
-         exercices
+        {' '+total+' '}
+         exercises
       </b>
     );
   };
 
-export default Footer
+export default Footer;
