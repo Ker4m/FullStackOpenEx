@@ -1,9 +1,12 @@
 const Footer = ({ parts }) => {
+  let sum = 0;
+  parts.forEach(part => sum += part.exercises )
     return (
-      <p>
-        Number of exercises{" "}
-        {parts[0].exercises + parts[1].exercises + parts[2].exercises}
-      </p>
+      <b>
+        total of
+        {' ' +sum+' '}
+         exercices
+      </b>
     );
   };
 
