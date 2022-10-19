@@ -43,6 +43,38 @@ const CountryDisplay = ({ country }) => {
         ))}
       </ul>
       <img src={country.flags.png} />
+      <WeatherSection country={country} />
+    </div>
+  );
+};
+
+const WeatherSection = ({ country }) => {
+  const api_key = process.env.REACT_APP_API_KEY;
+  const [capitalWeather, setCapitalWeather] = useState({
+    main: { temp: 0 },
+    weather: [{ icon: "" }],
+    wind: { speed: 0 },
+  });
+
+  useEffect(() => {
+    axios
+      .get(
+        `https://api.openweathermap.org/data/2.5/weather?q=${country.capital[0]}&appid=${api_key}&units=metric`
+      )
+      .then((response) => {
+        setCapitalWeather(response.data);
+        console.log(response.data);
+      });
+  }, [country]);
+
+  return (
+    <div>
+      <h2>Weather in {country.capital[0]}</h2>
+      <p>Temperature : {capitalWeather?.main?.temp} °C</p>
+      <img
+        src={`http://openweathermap.org/img/wn/${capitalWeather?.weather[0]?.icon}@2x.png`}
+      />
+      <p>Wind speed : {capitalWeather?.wind?.speed} m/s</p>
     </div>
   );
 };
