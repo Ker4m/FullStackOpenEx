@@ -52,6 +52,14 @@ const PersonList = ({ persons, search, onDelete }) => {
   );
 };
 
+const Notification = ({ message }) => {
+  if (message === null) {
+    return null;
+  }
+
+  return <div className="notif">{message}</div>;
+};
+
 const Filter = ({ search, setSearch }) => (
   <div>
     Filter shown with{" "}
@@ -71,6 +79,7 @@ const App = () => {
   const [newName, setNewName] = useState("");
   const [newNum, setNewNum] = useState("");
   const [search, setSearch] = useState("");
+  const [notifMessage, setNotifMessage] = useState(null);
 
   const addName = (event) => {
     event.preventDefault();
@@ -82,6 +91,10 @@ const App = () => {
     if (!persons.some((elem) => elem.name === newName)) {
       personService.create(personObject).then((returnedPerson) => {
         setPersons(persons.concat(returnedPerson));
+        setNotifMessage(`${newName} added`);
+        setTimeout(() => {
+          setNotifMessage(null);
+        }, 5000);
         setNewName("");
         setNewNum("");
       });
@@ -108,6 +121,12 @@ const App = () => {
                 : pers
             )
           );
+          setNotifMessage(`${newName}'s number updated`);
+          setTimeout(() => {
+            setNotifMessage(null);
+          }, 5000);
+          setNewName("");
+          setNewNum("");
         }
       }
     }
@@ -123,6 +142,7 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification message={notifMessage} />
       <Filter search={search} setSearch={setSearch} />
 
       <h3>Add a new</h3>
