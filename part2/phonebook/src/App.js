@@ -1,3 +1,4 @@
+import { type } from "@testing-library/user-event/dist/type";
 import { useState, useEffect } from "react";
 import personService from "./Services/persons";
 
@@ -52,12 +53,13 @@ const PersonList = ({ persons, search, onDelete }) => {
   );
 };
 
-const Notification = ({ message }) => {
-  if (message === null) {
+const Notification = ({ info }) => {
+  if (info === null) {
     return null;
   }
 
-  return <div className="notif">{message}</div>;
+  const { type, message } = info;
+  return <div className={type}>{message}</div>;
 };
 
 const Filter = ({ search, setSearch }) => (
@@ -91,7 +93,7 @@ const App = () => {
     if (!persons.some((elem) => elem.name === newName)) {
       personService.create(personObject).then((returnedPerson) => {
         setPersons(persons.concat(returnedPerson));
-        setNotifMessage(`${newName} added`);
+        setNotifMessage({ type: "notif", message: `${newName} added` });
         setTimeout(() => {
           setNotifMessage(null);
         }, 5000);
@@ -107,21 +109,38 @@ const App = () => {
             `${newName} is already added to the phonebook, replace the old number with a new one?`
           )
         ) {
-          personService.update(newPerson.id, {
-            ...newPerson,
-            number: newNum,
+          personService
+            .update(newPerson.id, {
+              ...newPerson,
+              number: newNum,
+            })
+            .then(() => {
+              setPersons(
+                persons.map((pers) =>
+                  pers.id === newPerson.id
+                    ? {
+                        ...newPerson,
+                        number: newNum,
+                      }
+                    : pers
+                )
+              );
+            })
+            .catch(() => {
+              setNotifMessage({
+                type: "error",
+                message: `Information of ${newName} has already been removed from server`,
+              });
+              personService.getAll();
+              setTimeout(() => {
+                setNotifMessage(null);
+              }, 5000);
+            });
+
+          setNotifMessage({
+            type: "notif",
+            message: `${newName}'s number updated`,
           });
-          setPersons(
-            persons.map((pers) =>
-              pers.id === newPerson.id
-                ? {
-                    ...newPerson,
-                    number: newNum,
-                  }
-                : pers
-            )
-          );
-          setNotifMessage(`${newName}'s number updated`);
           setTimeout(() => {
             setNotifMessage(null);
           }, 5000);
@@ -134,15 +153,35 @@ const App = () => {
 
   const onDelete = (id, name) => {
     if (window.confirm(`Delete ${name}`)) {
-      personService.remove(id);
-      setPersons(persons.filter((pers) => pers.id !== id));
+      personService
+        .remove(id)
+        .then((res) => {
+          setNotifMessage({
+            type: "notif",
+            message: `${name} deleted`,
+          });
+          setTimeout(() => {
+            setNotifMessage(null);
+          }, 5000);
+          setPersons(persons.filter((pers) => pers.id !== id));
+        })
+        .catch((err) => {
+          setNotifMessage({
+            type: "error",
+            message: `Information of ${name} has already been removed from server`,
+          });
+          personService.getAll();
+          setTimeout(() => {
+            setNotifMessage(null);
+          }, 5000);
+        });
     }
   };
 
   return (
     <div>
       <h2>Phonebook</h2>
-      <Notification message={notifMessage} />
+      <Notification info={notifMessage} />
       <Filter search={search} setSearch={setSearch} />
 
       <h3>Add a new</h3>
