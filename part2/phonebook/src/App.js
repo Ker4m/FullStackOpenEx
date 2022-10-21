@@ -19,23 +19,34 @@ const PersonForm = ({ addName, newName, setNewName, newNum, setNewNum }) => {
   );
 };
 
-const PersonList = ({ persons, search }) => {
+const PersonItem = ({ person, onDelete }) => {
+  return (
+    <div>
+      {person.name} {person.number}{" "}
+      <button
+        onClick={() => {
+          onDelete(person.id, person.name);
+        }}
+      >
+        Delete
+      </button>
+    </div>
+  );
+};
+
+const PersonList = ({ persons, search, onDelete }) => {
   return (
     <div>
       {search === ""
         ? persons.map((person) => (
-            <p key={person.id}>
-              {person.name} {person.number}
-            </p>
+            <PersonItem key={person.id} person={person} onDelete={onDelete} />
           ))
         : persons
             .filter((person) => {
               return person.name.toLowerCase().includes(search.toLowerCase());
             })
             .map((person) => (
-              <p key={person.id}>
-                {person.name} {person.number}
-              </p>
+              <PersonItem key={person.id} person={person} onDelete={onDelete} />
             ))}
     </div>
   );
@@ -79,6 +90,13 @@ const App = () => {
     }
   };
 
+  const onDelete = (id, name) => {
+    if (window.confirm(`Delete ${name}`)) {
+      personService.remove(id);
+      setPersons(persons.filter((pers) => pers.id !== id));
+    }
+  };
+
   return (
     <div>
       <h2>Phonebook</h2>
@@ -94,7 +112,7 @@ const App = () => {
       />
 
       <h2>Numbers</h2>
-      <PersonList persons={persons} search={search} />
+      <PersonList persons={persons} search={search} onDelete={onDelete} />
     </div>
   );
 };
