@@ -86,7 +86,30 @@ const App = () => {
         setNewNum("");
       });
     } else {
-      alert(`${newName} is already added to phonebook`);
+      if (newNum === "") alert(`${newName} is already added to phonebook`);
+      else {
+        const newPerson = persons.find((pers) => pers.name === newName);
+        if (
+          window.confirm(
+            `${newName} is already added to the phonebook, replace the old number with a new one?`
+          )
+        ) {
+          personService.update(newPerson.id, {
+            ...newPerson,
+            number: newNum,
+          });
+          setPersons(
+            persons.map((pers) =>
+              pers.id === newPerson.id
+                ? {
+                    ...newPerson,
+                    number: newNum,
+                  }
+                : pers
+            )
+          );
+        }
+      }
     }
   };
 
